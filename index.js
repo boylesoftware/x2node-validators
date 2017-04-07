@@ -61,14 +61,14 @@ exports.isSupported = function(obj) {
 
 // export record normalization function
 exports.normalizeRecord = function(
-	recordTypes, recordTypeName, record, lang, validationSet) {
+	recordTypes, recordTypeName, record, lang, validationSets) {
 
 	if (!recordTypes[TAG])
 		throw new common.X2UsageError(
 			'Record types library does not have the validators extension.');
 
 	return recordNormalizer.normalize(
-		recordTypes, recordTypeName, record, lang, validationSet);
+		recordTypes, recordTypeName, record, lang, validationSets);
 }
 
 
