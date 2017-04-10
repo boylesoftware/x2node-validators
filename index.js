@@ -90,24 +90,71 @@ exports.normalizeRecord = function(
 /////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Used to by record types library extensions to mark record type and property
- * descriptors to disable validators.
+ * Used to by record types library extensions to associate alternative list of
+ * default validators with record type and property descriptors.
  *
  * @private
  * @constant {Symbol}
  */
-const VALIDATORS_DISABLED = Symbol('VALIDATORS_DISABLED');
+const DEFAULT_VALIDATORS = Symbol('DEFAULT_VALIDATORS');
 
 /**
- * Can be used by record types library extensions to mark record type and
- * property descriptors so that the validators extension does not install any
- * validators on it (including the default ones).
+ * Can be used by record types library extensions to replace the default set of
+ * validators on a record type or property descriptor. Note that the validators
+ * module installs validators on properties and record types in an
+ * <code>onContainerComplete</code> handler, so extensions must call this
+ * function before that.
  *
- * @param {*} desc Descriptor object to mark.
+ * @param {(module:x2node-records~RecordTypeDescriptor|module:x2node-records~PropertyDescriptor)} desc
+ * The descriptor. May not be a view.
+ * @param {Object.<string,Array.<(string|Array)>>} validators Validator
+ * specifications as would be provided on the definition.
  */
-exports.disable = function(desc) {
+exports.replaceDefaultValidators = function(desc, validators) {
 
-	desc[VALIDATORS_DISABLED] = true;
+	if (desc.isView && desc.isView())
+		throw new common.X2UsageError(
+			'May not have validators on a view property.');
+
+	desc[DEFAULT_VALIDATORS] = validators;
+};
+/**
+ * Can be used by record types library extensions to add validators to the
+ * default set of validators on a record type or property descriptor. Note that
+ * the validators module installs validators on properties and record types in an
+ * <code>onContainerComplete</code> handler, so extensions must call this
+ * function before that.
+ *
+ * @param {(module:x2node-records~RecordTypeDescriptor|module:x2node-records~PropertyDescriptor)} desc
+ * The descriptor. May not be a view.
+ * @param {Object.<string,Array.<(string|Array)>>} validators Validator
+ * specifications as would be provided on the definition.
+ */
+exports.addDefaultValidators = function(desc, validators) {
+
+	if (desc.isView && desc.isView())
+		throw new common.X2UsageError(
+			'May not have validators on a view property.');
+
+	const defaultValidators = desc[DEFAULT_VALIDATORS];
+	for (let setId in validators) {
+		const setValidators = validators[setId];
+		let defaultSetValidators = defaultValidators[setId];
+		if (!defaultSetValidators)
+			defaultValidators[setId] = defaultSetValidators = new Array();
+		for (let validator of setValidators)
+			defaultSetValidators.push(validator);
+	}
+};
+
+exports.registerValidationErrorMessage = function(ctx, messageDef) {
+
+	// TODO: implement
+};
+
+exports.registerValidator = function(ctx, validatorFunc) {
+
+	// TODO: implement
 };
 
 /**
@@ -128,7 +175,8 @@ const VALIDATOR_DEFS_STACK = Symbol('VALIDATOR_DEFS');
 
 function createValidationErrorMessages(base, subjDef) {
 
-	if (!subjDef.validationErrorMessages)
+	if (!subjDef.validationErrorMessages &&
+		(base !== standard.VALIDATION_ERROR_MESSAGES))
 		return base;
 
 	const validationErrorMessages = Object.create(base);
@@ -153,7 +201,7 @@ function createValidationErrorMessages(base, subjDef) {
 
 function createValidatorFuncs(base, subjDef, subjDescription) {
 
-	if (!subjDef.validatorDefs)
+	if (!subjDef.validatorDefs && (base !== standard.VALIDATOR_DEFS))
 		return base;
 
 	const validatorFuncs = Object.create(base);
@@ -309,11 +357,11 @@ exports.extendPropertiesContainer = function(ctx, container) {
 		container._validationErrorMessages = validationErrorMessages;
 
 		// set up record validators
-		container._validators = null;
+		container[DEFAULT_VALIDATORS] = new Object();
 		ctx.onContainerComplete(container => {
-			if (!container[VALIDATORS_DISABLED])
-				container._validators = createValidators(
-					validatorFuncs, {}, container.definition, subjDescription);
+			container._validators = createValidators(
+				validatorFuncs, container[DEFAULT_VALIDATORS],
+				container.definition, subjDescription);
 		});
 
 		/**
@@ -394,56 +442,56 @@ exports.extendPropertyDescriptor = function(ctx, propDesc) {
 	propDesc._validators = null;
 	if (!propDesc.isView()) {
 
+		// determine default validators
+		const defaultValidators = [];
+		const defaultElementValidators = [];
+		if (!propDesc.optional)
+			defaultValidators.push('required');
+		let contextValidators = defaultValidators;
+		if (propDesc.isArray()) {
+			defaultValidators.push('array');
+			if (propDesc.scalarValueType === 'object') {
+				defaultElementValidators.push('required');
+			} else if (!propDesc.allowDuplicates) {
+				defaultValidators.push('noDupes');
+			}
+			contextValidators = defaultElementValidators;
+		} else if (propDesc.isMap()) {
+			defaultValidators.push('object');
+			if (propDesc.scalarValueType === 'object')
+				defaultElementValidators.push('required');
+			contextValidators = defaultElementValidators;
+		}
+		switch (propDesc.scalarValueType) {
+		case 'string':
+			contextValidators.push('string');
+			contextValidators.push('trim');
+			break;
+		case 'number':
+			contextValidators.push('number');
+			break;
+		case 'boolean':
+			contextValidators.push('boolean');
+			break;
+		case 'datetime':
+			contextValidators.push('datetime');
+			break;
+		case 'ref':
+			contextValidators.push([ 'ref', propDesc.refTarget ]);
+			break;
+		case 'object':
+			contextValidators.push('object');
+		}
+		propDesc[DEFAULT_VALIDATORS] = {
+			'*': defaultValidators,
+			'element:*': defaultElementValidators
+		};
+
 		// set up property validators
 		ctx.onContainerComplete(() => {
-			if (!propDesc[VALIDATORS_DISABLED]) {
-
-				// determine default validators
-				const defaultValidators = [];
-				const defaultElementValidators = [];
-				if (!propDesc.optional)
-					defaultValidators.push('required');
-				let contextValidators = defaultValidators;
-				if (propDesc.isArray()) {
-					defaultValidators.push('array');
-					if (propDesc.scalarValueType === 'object')
-						defaultElementValidators.push('required');
-					contextValidators = defaultElementValidators;
-				} else if (propDesc.isMap()) {
-					defaultValidators.push('object');
-					if (propDesc.scalarValueType === 'object')
-						defaultElementValidators.push('required');
-					contextValidators = defaultElementValidators;
-				}
-				switch (propDesc.scalarValueType) {
-				case 'string':
-					contextValidators.push('string');
-					contextValidators.push('trim');
-					break;
-				case 'number':
-					contextValidators.push('number');
-					break;
-				case 'boolean':
-					contextValidators.push('boolean');
-					break;
-				case 'datetime':
-					contextValidators.push('datetime');
-					break;
-				case 'ref':
-					contextValidators.push([ 'ref', propDesc.refTarget ]);
-					break;
-				case 'object':
-					contextValidators.push('object');
-				}
-
-				// set up the validators
-				propDesc._validators = createValidators(
-					validatorFuncs, {
-						'*': defaultValidators,
-						'element:*': defaultElementValidators
-					},
-					propDesc.definition, subjDescription);
-			}
+			propDesc._validators = createValidators(
+				validatorFuncs, propDesc[DEFAULT_VALIDATORS],
+				propDesc.definition, subjDescription);
 		});
 	}
 
