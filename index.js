@@ -4,7 +4,7 @@
  * @module x2node-validators
  * @requires module:x2node-common
  * @requires module:x2node-records
- * @requires module:x2node-patches
+ * @requires module:x2node-pointers
  * @implements {module:x2node-records.Extension}
  */
 'use strict';
@@ -440,7 +440,7 @@ exports.extendPropertyDescriptor = function(ctx, propDesc) {
 
 	// setup validators is not a view
 	propDesc._validators = null;
-	if (!propDesc.isView()) {
+	if (!propDesc.isView() && !propDesc.isPolymorphObjectType()) {
 
 		// determine default validators
 		const defaultValidators = [];
