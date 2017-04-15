@@ -2,6 +2,12 @@
   "name": "x2node-validators",
   "version": "1.0.0-alpha.0",
   "description": "Record validation and normalization.",
+  "keywords": [
+    "validation",
+    "validator",
+    "x2node",
+    "nodejs"
+  ],
   "main": "index.js",
   "scripts": {
     "test": "eslint . && mocha",
