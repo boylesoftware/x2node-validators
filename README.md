@@ -4,7 +4,19 @@ This module extends the basic X2 Framework's [record types library](https://www.
 
 ## Table of Contents
 
-TBD
+* [Usage](#usage)
+* [Collection Element Validators](#collection-element-validators)
+* [Customizing Validation Error Messages](#customizing-validation-error-messages)
+* [Validation Error Messages Internationalization](#validation-error-messages-internationalization)
+* [Standard Validators](#standard-validators)
+* [Validation Sets](#validation-sets)
+* [Disabling Default Validators](#disabling-default-validators)
+* [Writing Custom Validators](#writing-custom-validators)
+  * [Validation Functions](#validation-functions)
+  * [Validation Context](#validation-context)
+  * [Object Validators and Validation Order](#object-validators-and-validation-order)
+* [Record Types Library Extension](#record-types-library-extension)
+* [Changing Default Validation Rules in Extensions](#changing-default-validation-rules-in-extensions)
 
 ## Usage
 
@@ -61,7 +73,7 @@ else
 
 Any property or the record type definition can have a `validators` attribute, which is an array of validator/normalizator references, possibly with parameters. Each reference is either a string with a registered the validator id or, if the validator requires parameters, an array where the first element is the validator id followed by the parameters.
 
-Each validator may have two functions: value _validation_ and value _normalization_. The validation checks if the value is approprivate and if not, reports a specific validation error message. Also, a validator may normalize the value (for example trim a string, convert it to all lowercase, remove non-digits, etc.). The normalized value is set back into the record. In the example above the `lowercase` normalizer used on the `email` property updates the `email` property of the provided record to _john@walrus.com_ from _John@Walrus.com_ after the `normalizeRecord()` function call.
+Each validator may have two functions: value _validation_ and value _normalization_. The validation checks if the value is approprivate and if not, reports a specific validation error message. Also, a validator may normalize the value (for example trim a string, convert it to all lowercase, remove non-digits, etc.). The normalized value is set back into the record. In the example above the `lowercase` normalizer used on the `email` property updates the `email` property of the provided record to _john@<span></span>walrus.com_ from _John@<span></span>Walrus.com_ after the `normalizeRecord()` function call.
 
 Upon successful validation, the returned by the `normalizeRecord()` function `errors` object is `null`. However, if there are validation errors, they are reported in that object. The keys in that case will be JSON pointers (see [RFC 6901 JSON Pointer](https://tools.ietf.org/html/rfc6901)) for the invalid record elements and values will be arrays of corresponding validation error messages (at least one). So, for example the following invalid _Contact_ record:
 
