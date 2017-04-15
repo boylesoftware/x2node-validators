@@ -99,6 +99,22 @@ exports.normalizeRecord = function(
 const DEFAULT_VALIDATORS = Symbol('DEFAULT_VALIDATORS');
 
 /**
+ * Symbol on the context for the validation error messages stack.
+ *
+ * @private
+ * @constant {Symbol}
+ */
+const VALIDATION_ERROR_MESSAGES_STACK = Symbol('VALIDATION_ERROR_MESSAGES');
+
+/**
+ * Symbol on the context for the validator definition stack.
+ *
+ * @private
+ * @constant {Symbol}
+ */
+const VALIDATOR_DEFS_STACK = Symbol('VALIDATOR_DEFS');
+
+/**
  * Can be used by record types library extensions to replace the default set of
  * validators on a record type or property descriptor. Note that the validators
  * module installs validators on properties and record types in an
@@ -118,6 +134,7 @@ exports.replaceDefaultValidators = function(desc, validators) {
 
 	desc[DEFAULT_VALIDATORS] = validators;
 };
+
 /**
  * Can be used by record types library extensions to add validators to the
  * default set of validators on a record type or property descriptor. Note that
@@ -147,32 +164,59 @@ exports.addDefaultValidators = function(desc, validators) {
 	}
 };
 
-exports.registerValidationErrorMessage = function(ctx, messageDef) {
+/**
+ * Can be used by record types library extensions to register additional
+ * validation error messages available to the library. Depending on where the
+ * function is called the registred message scope is determined. For example, if
+ * called in the extention's <code>extendRecordTypesLibrary()</code> method, the
+ * message is registred for the whole library.
+ *
+ * @param {module:x2node-records~LibraryConstructionContext} ctx Library
+ * construction context.
+ * @param {string} messageId Message identifier.
+ * @param {Object.<string,string>} messageDef Message definition. The keys are
+ * language codes, the values are message templates.
+ */
+exports.registerValidationErrorMessage = function(ctx, messageId, messageDef) {
 
-	// TODO: implement
-};
+	const validationErrorMessagesStack = ctx[VALIDATION_ERROR_MESSAGES_STACK];
+	const validationErrorMessages = validationErrorMessagesStack[
+		validationErrorMessagesStack.length - 1];
 
-exports.registerValidator = function(ctx, validatorFunc) {
-
-	// TODO: implement
+	validationErrorMessages[messageId] = messageDef;
 };
 
 /**
- * Symbol on the context for the validation error messages stack.
+ * Can be used by record types library extensions to register additional
+ * validators available to the library. Depending on where the function is called
+ * the registred validator scope is determined. For example, if called in the
+ * extention's <code>extendRecordTypesLibrary()</code> method, the validator is
+ * registred for the whole library.
  *
- * @private
- * @constant {Symbol}
+ * @param {module:x2node-records~LibraryConstructionContext} ctx Library
+ * construction context.
+ * @param {string} validatorId Validator id.
+ * @param {module:x2node-validators.validator} Validator function.
  */
-const VALIDATION_ERROR_MESSAGES_STACK = Symbol('VALIDATION_ERROR_MESSAGES');
+exports.registerValidator = function(ctx, validatorId, validatorFunc) {
+
+	const validatorDefsStack = ctx[VALIDATOR_DEFS_STACK];
+	const validatorFuncs = validatorDefsStack[validatorDefsStack.length - 1];
+
+	validatorFuncs[validatorId] = validatorFunc;
+};
 
 /**
- * Symbol on the context for the validator definition stack.
+ * Create validation error messages set for the specified container or property.
  *
  * @private
- * @constant {Symbol}
+ * @param {Object.<string,Object<string,string>>} base Base validation error
+ * messages set from the context.
+ * @param {Object} subjDef Subject definition object possibly containing a
+ * <code>validationErrorMessages</code> attribute.
+ * @returns {Object.<string,Object<string,string>>} Validation error messages set
+ * to use for the subject.
  */
-const VALIDATOR_DEFS_STACK = Symbol('VALIDATOR_DEFS');
-
 function createValidationErrorMessages(base, subjDef) {
 
 	if (!subjDef.validationErrorMessages &&
@@ -199,6 +243,18 @@ function createValidationErrorMessages(base, subjDef) {
 	return validationErrorMessages;
 }
 
+/**
+ * Create validator functions set for the specified container or property.
+ *
+ * @private
+ * @param {Object.<string,module:x2node-validators.validator>} base Base
+ * validator functions set from the context.
+ * @param {Object} subjDef Subject definition object possibly containing a
+ * <code>validatorDefs</code> attribute.
+ * @param {string} subjDescription Subject description for error messages.
+ * @returns {Object.<string,module:x2node-validators.validator>} validator
+ * functions set to use for the subject.
+ */
 function createValidatorFuncs(base, subjDef, subjDescription) {
 
 	if (!subjDef.validatorDefs && (base !== standard.VALIDATOR_DEFS))
@@ -217,6 +273,20 @@ function createValidatorFuncs(base, subjDef, subjDescription) {
 	return validatorFuncs;
 }
 
+/**
+ * Create validators for the container or property.
+ *
+ * @private
+ * @param {Object.<string,module:x2node-validators.validator>} validatorFuncs
+ * Validator functions set.
+ * @param {Object} defaultValidators Default validators specification for the
+ * subject.
+ * @param (Object} subjDef Subject definition object possibly containing a
+ * <code>validators</code> attribute.
+ * @param {string} subjDescription Subject description for error messages.
+ * @returns {Object.<string,Array.<module:x2node-validators.curriedValidator>>}
+ * The validators for the subject.
+ */
 function createValidators(
 	validatorFuncs, defaultValidators, subjDef, subjDescription) {
 
@@ -367,7 +437,7 @@ exports.extendPropertiesContainer = function(ctx, container) {
 		/**
 		 * Record type title.
 		 *
-		 * @member {(string|Object.<string|string>)} module:x2node-validators.RecordTypeDescriptorWithValidators#title
+		 * @member {(string|Object.<string,string>)} module:x2node-validators.RecordTypeDescriptorWithValidators#title
 		 * @readonly
 		 */
 		Object.defineProperty(container, 'title', {
@@ -498,7 +568,7 @@ exports.extendPropertyDescriptor = function(ctx, propDesc) {
 	/**
 	 * Property title.
 	 *
-	 * @member {(string|Object.<string|string>)} module:x2node-validators.PropertyDescriptorWithValidators#title
+	 * @member {(string|Object.<string,string>)} module:x2node-validators.PropertyDescriptorWithValidators#title
 	 * @readonly
 	 */
 	Object.defineProperty(propDesc, 'title', {
