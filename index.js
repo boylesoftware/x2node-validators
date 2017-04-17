@@ -13,6 +13,7 @@ const common = require('x2node-common');
 
 const recordNormalizer = require('./lib/record-normalizer.js');
 const standard = require('./lib/standard.js');
+const ValidationErrors = require('./lib/validation-errors.js');
 
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -64,14 +65,6 @@ exports.isSupported = function(obj) {
  * set back into the record object.
  */
 
-/**
- * Validation errors object. The keys are RFC 6901 JSON pointers for the invalid
- * parts of the record (empty string for error about the record as a whole). The
- * values are arrays of error messages.
- *
- * @typedef {Object.<string,Array.<string>>} module:x2node-validators~ValidationErrors
- */
-
 // export record normalization function
 exports.normalizeRecord = function(
 	recordTypes, recordTypeName, record, lang, validationSets) {
@@ -83,6 +76,28 @@ exports.normalizeRecord = function(
 	return recordNormalizer.normalize(
 		recordTypes, recordTypeName, record, lang, validationSets);
 }
+
+/**
+ * Create new, empty validation errors object.
+ *
+ * @returns {module:x2node-validators~ValidationErrors} Validation errors object.
+ */
+exports.createValidationErrors = function() {
+
+	return new ValidationErrors();
+};
+
+/**
+ * Tell if the provided object is a validation errors object.
+ *
+ * @param {*} obj The object to test.
+ * @returns {boolean} <code>true</code> if instance of
+ * [ValidationErrors]{@link module:x2node-validators~ValidationErrors}.
+ */
+exports.isValidationErrors = function(obj) {
+
+	return (obj instanceof ValidationErrors);
+};
 
 
 /////////////////////////////////////////////////////////////////////////////////

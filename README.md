@@ -75,7 +75,7 @@ Any property or the record type definition can have a `validators` attribute, wh
 
 Each validator may have two functions: value _validation_ and value _normalization_. The validation checks if the value is approprivate and if not, reports a specific validation error message. Also, a validator may normalize the value (for example trim a string, convert it to all lowercase, remove non-digits, etc.). The normalized value is set back into the record. In the example above the `lowercase` normalizer used on the `email` property updates the `email` property of the provided record to _john@<span></span>walrus.com_ from _John@<span></span>Walrus.com_ after the `normalizeRecord()` function call.
 
-Upon successful validation, the returned by the `normalizeRecord()` function `errors` object is `null`. However, if there are validation errors, they are reported in that object. The keys in that case will be JSON pointers (see [RFC 6901 JSON Pointer](https://tools.ietf.org/html/rfc6901)) for the invalid record elements and values will be arrays of corresponding validation error messages (at least one). So, for example the following invalid _Contact_ record:
+Upon successful validation, the returned by the `normalizeRecord()` function `errors` object is `null`. However, if there are validation errors, they are reported in that object. The errors object's own enumerable property names in that case will be JSON pointers (see [RFC 6901 JSON Pointer](https://tools.ietf.org/html/rfc6901)) for the invalid record elements and values will be arrays of corresponding validation error messages (at least one). So, for example the following invalid _Contact_ record:
 
 ```json
 {
@@ -483,6 +483,39 @@ As a record types library extension, the validators module adds its own properti
 * `validationErrorMessages` - Context validation error message templates. It is an object with keys being message ids and values being either strings, or objects with language keys depending on whether the message is internationalized or not.
 
 * `validators` - The validators or `null` if none. The value is an object with keys being validation set ids and values being arrays of validation functions. The functions are curried with the first `params` argument.
+
+## Validation Errors Object
+
+The validation errors object normally returned by the module's `normalizeRecord()` function can be also used on its own. To create a new, empty validation errors object the module exports `createValidationErrors()` function. Then, the errors object itself exposes a few methods that allow working with it. Here is an example:
+
+```javascript
+const validators = require('x2node-validators');
+
+const errors = validators.createValidationErrors();
+
+errors.addError('/myProp', 'My property is invalid.');
+
+if (errors.hasError('/myProp'))
+	console.log('I told ya\', it\'s totally invalid.');
+
+if (errors.isEmpty())
+	console.log('Nope, it\'s not empty dude!');
+```
+
+The object's methods are:
+
+* `addError(ptr, message)` - Add error message associated with the specified record element to the errors object. The pointer can be either a JSON Pointer string, or a `RecordElementPointer` object (from the `x2node-pointers` module).
+
+* `hasError(ptr)` - Tells if the errors object has any errors for the specified by pointer record element.
+
+* `isEmpty()` - Tells if there are no errors in the errors object.
+
+Also, the module exports `isValidationErrors()` function that tells if the provided as argument is a validation errors object:
+
+```javascript
+if (validators.isValidationErrors(errors))
+	console.log(JSON.stringify(errors));
+```
 
 ## Changing Default Validation Rules in Extensions
 
