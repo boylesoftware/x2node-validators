@@ -16,6 +16,7 @@ This module extends the basic X2 Framework's [record types library](https://www.
   * [Validation Context](#validation-context)
   * [Object Validators and Validation Order](#object-validators-and-validation-order)
 * [Record Types Library Extension](#record-types-library-extension)
+* [Validation Errors Object](#validation-errors-object)
 * [Changing Default Validation Rules in Extensions](#changing-default-validation-rules-in-extensions)
 
 ## Usage
