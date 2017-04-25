@@ -320,7 +320,7 @@ function createValidators(
 						'Invalid validators specification on ' +
 							subjDescription + ': expected an array for' +
 							' validation set ' + setsSpec + '.');
-				for (let setId of setValidators.split(',')) {
+				for (let setId of setsSpec.split(',')) {
 					let set = sets[setId];
 					if (!set)
 						sets[setId] = set = new Array();
