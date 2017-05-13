@@ -2,6 +2,8 @@
 
 This module extends the basic X2 Framework's [record types library](https://www.npmjs.com/package/x2node-records) and adds validation and value normalization rules to the records and record properties.
 
+See module's [API Reference Documentation](https://boylesoftware.github.io/x2node-api-reference/module-x2node-validators.html).
+
 ## Table of Contents
 
 * [Usage](#usage)
