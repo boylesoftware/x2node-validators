@@ -306,6 +306,7 @@ function createValidators(
 	validatorFuncs, defaultValidators, subjDef, subjDescription) {
 
 	const sets = new Object(defaultValidators);
+
 	if (subjDef.validators) {
 		if (Array.isArray(subjDef.validators)) {
 			if (sets['*'])
@@ -324,6 +325,36 @@ function createValidators(
 					let set = sets[setId];
 					if (!set)
 						sets[setId] = set = new Array();
+					for (let validatorSpec of setValidators)
+						set.push(validatorSpec);
+				}
+			}
+		} else {
+			throw new common.X2UsageError(
+				'Invalid validators specification on ' + subjDescription +
+					': expected an object or an array.');
+		}
+	}
+
+	if (subjDef.elementValidators) {
+		if (Array.isArray(subjDef.elementValidators)) {
+			if (sets['element:*'])
+				sets['element:*'] = sets['element:*'].concat(
+					subjDef.elementValidators);
+			else
+				sets['element:*'] = subjDef.elementValidators;
+		} else if ((typeof subjDef.elementValidators) === 'object') {
+			for (let setsSpec in subjDef.elementValidators) {
+				const setValidators = subjDef.elementValidators[setsSpec];
+				if (!Array.isArray(setValidators))
+					throw new common.X2UsageError(
+						'Invalid element validators specification on ' +
+							subjDescription + ': expected an array for' +
+							' validation set ' + setsSpec + '.');
+				for (let setId of setsSpec.split(',')) {
+					let set = sets['element:' + setId];
+					if (!set)
+						sets['element:' + setId] = set = new Array();
 					for (let validatorSpec of setValidators)
 						set.push(validatorSpec);
 				}

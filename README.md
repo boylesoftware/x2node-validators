@@ -172,7 +172,7 @@ const recordTypes = records.with(validators).buildLibrary({
 });
 ```
 
-One message template parameter provided to all templates regardless of the validator used is `${field}`, which is the property or record type title. By default, the title of a property or a record type is the property or the record type name, but it can be modified by providing a `title` attribute on the record type of the property definition. In addition to the `${field}` parameters there is also a `${Field}` parameter, which is the same, but automatically capitalized to use at the beginning of an error message template.
+One message template parameter provided to all templates regardless of the validator used is `${field}`, which is the property or record type title. By default, the title of a property or a record type is the property or the record type name, but it can be modified by providing a `title` attribute on the record type or the property definition. In addition to the `${field}` parameters there is also a `${Field}` parameter, which is the same, but automatically capitalized to use at the beginning of an error message template.
 
 ## Validation Error Messages Internationalization
 
@@ -284,11 +284,11 @@ The module provides the following validators and normalizers out of the box:
 
 * `[ 'minLength', length ]` - Makes sure a string or an array property is not shorter than the specified minimum length. Uses message id `tooShort` with parameter `${min}`.
 
-* `[ 'max', value ]` - Makes sure a number property is not greater than the specified maximum value. Uses message id `tooLarge` with parameter `${max}`.
+* `[ 'max', value ]` - Makes sure a property is not greater than the specified maximum value. Uses message id `tooLarge` with parameter `${max}`. The type of the `value` parameter must be the same as the valid property value type.
 
-* `[ 'min', value ]` - Makes sure a number property is not smaller than the specified minimum value. Uses message id `tooSmall` with parameter `${min}`.
+* `[ 'min', value ]` - Makes sure a property is not smaller than the specified minimum value. Uses message id `tooSmall` with parameter `${min}`. The type of the `value` parameter must be the same as the valid property value type.
 
-* `[ 'range', min, max ]` - Makes sure a number property is within the specified range. Uses message id `outOfRange` with `${min}` and `${max}` parameters.
+* `[ 'range', min, max ]` - Makes sure a property is within the specified range. Uses message id `outOfRange` with `${min}` and `${max}` parameters. The type of the `min` and `max` parameters must be the same as the valid property value type.
 
 * `[ 'oneof', value1, value2, ... ]` - Makes sure the property has one of the specified values. Javascript's `===` operator is used to compare the values. Uses message id `invalidValue`.
 
@@ -317,6 +317,8 @@ The module provides the following validators and normalizers out of the box:
 * `'loc_US:zip5'` - Makes sure that a string property is a 5-digit US ZIP code. Uses message id `invalidUSZip`.
 
 * `'loc_US:phone10'` - Makes sure that a string property is a 10-digit phone number. Normalizes the value by removing all spaces, dashes and parentheses. Uses message id `invalidUSPhone`.
+
+* `[ 'rangeDef', loPropName, hiPropName ]` - Validates a record or a nested object property by making sure that its child property named by the `loPropName` parameter is not greater than the one named by the `hiPropName` parameter. Both property values must be present for the validation to take place. If the "lo" property is greater than the "hi" property, an error is added to the property identified by the `hiPropName` parameter. The message id is `invalidRangeDef` and two parameters are mde available: `${rangeLoName}` for the `loPropName` property's title and `${rangeLoNameCaps}` for the same title but with capitalized first letter.
 
 ## Validation Sets
 
@@ -436,6 +438,8 @@ The validation context object provided to the validation functions exposes the f
 
 * `containersChain` - Array of objects and arrays that in a nested fashion contain the record element being validated. The first element is the record as a whole and the last element is the immediate container of the current record element. For the record validator, the chain is an empty array.
 
+* `getElementTitle(ptr)` - Get title of the record element identified by the pointer. The `ptr` argument can be either a JSON pointer string or `RecordElementPointer` object. The method returns the corresponding property or record type title as a string.
+
 ### Object Validators and Validation Order
 
 Validators specified on record types and nested object properties allow validating complex objects and checking integrity when it depends on values of multiple properties. For example, if we have a calendar entry record, we must make sure that the "from" time is not greater than the "to" time. It can be done with a custom validator like this:
@@ -481,7 +485,7 @@ This logic relies on the specific order, in which validators are called. The fra
 
 As a record types library extension, the validators module adds its own properties to `RecordTypeDescriptor` and `PropertyDescriptor` objects:
 
-* `title` - The record type of property title, which can be a string for a non-internationalized title or an object with language code keys for an internationalized title.
+* `title` - The record type or property title, which can be a string for a non-internationalized title or an object with language code keys for an internationalized title.
 
 * `validationErrorMessages` - Context validation error message templates. It is an object with keys being message ids and values being either strings, or objects with language keys depending on whether the message is internationalized or not.
 
