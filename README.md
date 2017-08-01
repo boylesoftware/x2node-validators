@@ -290,7 +290,7 @@ The module provides the following validators and normalizers out of the box:
 
 * `[ 'range', min, max ]` - Makes sure a property is within the specified range. Uses message id `outOfRange` with `${min}` and `${max}` parameters. The type of the `min` and `max` parameters must be the same as the valid property value type.
 
-* `[ 'oneof', value1, value2, ... ]` - Makes sure the property has one of the specified values. Javascript's `===` operator is used to compare the values. Uses message id `invalidValue`.
+* `[ 'oneOf', value1, value2, ... ]` - Makes sure the property has one of the specified values. Javascript's `===` operator is used to compare the values. Uses message id `invalidValue`.
 
 * `'lowercase'` - Normalizer that converts strings to all lowercase.
 
