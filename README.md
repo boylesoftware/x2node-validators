@@ -30,48 +30,48 @@ const records = require('x2node-records');
 const validators = require('x2node-validators');
 
 const recordTypes = records.with(validators).buildLibrary({
-	recordTypes: {
-		'Contact': {
-			properties: {
-				'id': {
-					valueType: 'number',
-					role: 'id'
-				},
-				'name': {
-					valueType: 'string',
-					validators: [ [ 'maxLength', 50 ] ]
-				},
-				'rank': {
-					valueType: 'number',
-					validators: [ 'integer', [ 'range', 1, 10 ] ]
-				},
-				'email': {
-					valueType: 'string',
-					optional: true,
-					validators: [ 'email', 'lowercase' ]
-				},
-				'status': {
-					valueType: 'string',
-					validators: [ [ 'pattern', /^(ACTIVE|INACTIVE)$/ ] ]
-				}
-			}
-		}
-	}
+    recordTypes: {
+        'Contact': {
+            properties: {
+                'id': {
+                    valueType: 'number',
+                    role: 'id'
+                },
+                'name': {
+                    valueType: 'string',
+                    validators: [ [ 'maxLength', 50 ] ]
+                },
+                'rank': {
+                    valueType: 'number',
+                    validators: [ 'integer', [ 'range', 1, 10 ] ]
+                },
+                'email': {
+                    valueType: 'string',
+                    optional: true,
+                    validators: [ 'email', 'lowercase' ]
+                },
+                'status': {
+                    valueType: 'string',
+                    validators: [ [ 'pattern', /^(ACTIVE|INACTIVE)$/ ] ]
+                }
+            }
+        }
+    }
 });
 
 const contactRecord = {
-	id: 1,
-	name: 'John Silver',
-	rank: 9,
-	email: 'John@Walrus.com',
-	status: 'ACTIVE'
+    id: 1,
+    name: 'John Silver',
+    rank: 9,
+    email: 'John@Walrus.com',
+    status: 'ACTIVE'
 };
 
 const errors = validators.normalizeRecord(recordTypes, 'Contact', contactRecord);
 if (errors)
-	console.log('Validation errors:', errors);
+    console.log('Validation errors:', errors);
 else
-	console.log('The record is valid!');
+    console.log('The record is valid!');
 ```
 
 Any property or the record type definition can have a `validators` attribute, which is an array of validator/normalizator references, possibly with parameters. Each reference is either a string with a registered the validator id or, if the validator requires parameters, an array where the first element is the validator id followed by the parameters.
@@ -108,19 +108,19 @@ For collection properties it is often necessary to specify validators for the co
 
 ```javascript
 const recordTypes = records.with(validators).buildLibrary({
-	recordTypes: {
-		'Student': {
-			properties: {
-				...
-				'monthlyScores': {
-					valueType: 'number[]',
-					validators: [ [ 'maxLength', 12 ] ],
-					elementValidators: [ [ 'precision', 1 ], [ 'range', 0, 10 ] ]
-				},
-				...
-			}
-		}
-	}
+    recordTypes: {
+        'Student': {
+            properties: {
+                ...
+                'monthlyScores': {
+                    valueType: 'number[]',
+                    validators: [ [ 'maxLength', 12 ] ],
+                    elementValidators: [ [ 'precision', 1 ], [ 'range', 0, 10 ] ]
+                },
+                ...
+            }
+        }
+    }
 });
 ```
 
@@ -130,21 +130,21 @@ As it will be described further in this manual, when a validator detects an erro
 
 ```javascript
 const recordTypes = records.with(validators).buildLibrary({
-	recordTypes: {
-		'Contact': {
-			properties: {
-				...
-				'status': {
-					valueType: 'string',
-					validators: [ [ 'pattern', /^(ACTIVE|INACTIVE)$/ ] ],
-					validationErrorMessages: {
-						'invalidPattern': 'Invalid contact status value.'
-					}
-				},
-				...
-			}
-		}
-	}
+    recordTypes: {
+        'Contact': {
+            properties: {
+                ...
+                'status': {
+                    valueType: 'string',
+                    validators: [ [ 'pattern', /^(ACTIVE|INACTIVE)$/ ] ],
+                    validationErrorMessages: {
+                        'invalidPattern': 'Invalid contact status value.'
+                    }
+                },
+                ...
+            }
+        }
+    }
 });
 ```
 
@@ -154,21 +154,21 @@ The messages associated with the ids are actually message templates as they allo
 
 ```javascript
 const recordTypes = records.with(validators).buildLibrary({
-	recordTypes: {
-		'Contact': {
-			properties: {
-				...
-				'rank': {
-					valueType: 'number',
-					validators: [ 'integer', [ 'range', 1, 10 ] ],
-					validationErrorMessages: {
-						'outOfRange': 'The rank must be between ${min} and ${max}.'
-					}
-				},
-				...
-			}
-		}
-	}
+    recordTypes: {
+        'Contact': {
+            properties: {
+                ...
+                'rank': {
+                    valueType: 'number',
+                    validators: [ 'integer', [ 'range', 1, 10 ] ],
+                    validationErrorMessages: {
+                        'outOfRange': 'The rank must be between ${min} and ${max}.'
+                    }
+                },
+                ...
+            }
+        }
+    }
 });
 ```
 
@@ -180,24 +180,24 @@ The validation error messages can be localized for different languages. To do th
 
 ```javascript
 const recordTypes = records.with(validators).buildLibrary({
-	recordTypes: {
-		'Contact': {
-			properties: {
-				...
-				'rank': {
-					valueType: 'number',
-					validators: [ 'integer', [ 'range', 1, 10 ] ],
-					validationErrorMessages: {
-						'outOfRange': {
-							'en-US': 'The rank must be between ${min} and ${max}.',
-							'es': 'El rango debe estar entre ${min} y ${max}.'
-						}
-					}
-				},
-				...
-			}
-		}
-	}
+    recordTypes: {
+        'Contact': {
+            properties: {
+                ...
+                'rank': {
+                    valueType: 'number',
+                    validators: [ 'integer', [ 'range', 1, 10 ] ],
+                    validationErrorMessages: {
+                        'outOfRange': {
+                            'en-US': 'The rank must be between ${min} and ${max}.',
+                            'es': 'El rango debe estar entre ${min} y ${max}.'
+                        }
+                    }
+                },
+                ...
+            }
+        }
+    }
 });
 ```
 
@@ -205,14 +205,14 @@ The error message language preference is provided to the module's `normalizeReco
 
 ```javascript
 const errors = validators.normalizeRecord(
-	recordTypes, 'Contact', contactRecord, 'es');
+    recordTypes, 'Contact', contactRecord, 'es');
 ```
 
 The parameter actually allows specification of multiple preferred languages using the exact same syntax as used for "Accept-Language" HTTP request header. So, the following is also possible:
 
 ```javascript
 const errors = validators.normalizeRecord(
-	recordTypes, 'Contact', contactRecord, 'en-US,en;q=0.8,es-419;q=0.6,es;q=0.4');
+    recordTypes, 'Contact', contactRecord, 'en-US,en;q=0.8,es-419;q=0.6,es;q=0.4');
 ```
 
 If the preferred language is not provided, or there is no specific template matching any of the requested languages, the first language in the `validationErrorMessages` attribute is used (in the example above that would be "en-US").
@@ -221,28 +221,28 @@ The same localization technique also applies to the `title` property or record t
 
 ```javascript
 const recordTypes = records.with(validators).buildLibrary({
-	recordTypes: {
-		'Contact': {
-			validationErrorMessages: {
-				'outOfRange': {
-					'en-US': 'The ${field} must be between ${min} and ${max}.',
-					'es': 'El ${field} debe estar entre ${min} y ${max}.'
-				}
-			},
-			properties: {
-				...
-				'rank': {
-					title: {
-						'en-US': 'rank',
-						'es': 'rango'
-					},
-					valueType: 'number',
-					validators: [ 'integer', [ 'range', 1, 10 ] ]
-				},
-				...
-			}
-		}
-	}
+    recordTypes: {
+        'Contact': {
+            validationErrorMessages: {
+                'outOfRange': {
+                    'en-US': 'The ${field} must be between ${min} and ${max}.',
+                    'es': 'El ${field} debe estar entre ${min} y ${max}.'
+                }
+            },
+            properties: {
+                ...
+                'rank': {
+                    title: {
+                        'en-US': 'rank',
+                        'es': 'rango'
+                    },
+                    valueType: 'number',
+                    validators: [ 'integer', [ 'range', 1, 10 ] ]
+                },
+                ...
+            }
+        }
+    }
 });
 ```
 
@@ -326,21 +326,21 @@ Sometimes it is necessary to invoke different sets of validators for the same pr
 
 ```javascript
 const recordTypes = records.with(validators).buildLibrary({
-	recordTypes: {
-		'MyRecord': {
-			properties: {
-				'myProperty': {
-					valueType: 'string',
-					validators: {
-						'set1': [ 'validator1' ],
-						'set2': [ 'validator2' ],
-						'set1,set2': [ 'validator3' ],
-						'*': [ 'validator4' ]
-					}
-				},
-			}
-		}
-	}
+    recordTypes: {
+        'MyRecord': {
+            properties: {
+                'myProperty': {
+                    valueType: 'string',
+                    validators: {
+                        'set1': [ 'validator1' ],
+                        'set2': [ 'validator2' ],
+                        'set1,set2': [ 'validator3' ],
+                        '*': [ 'validator4' ]
+                    }
+                },
+            }
+        }
+    }
 });
 ```
 
@@ -348,7 +348,7 @@ The validation sets are passed in a comma-separated list, if more than one, to t
 
 ```javascript
 const errors = validators.normalizeRecord(
-	recordTypes, 'MyRecord', record, 'en-US', 'set1');
+    recordTypes, 'MyRecord', record, 'en-US', 'set1');
 ```
 
 the following validators will be called in this specific order: `validator1`, `validator3` and `validator4`.
@@ -359,16 +359,16 @@ As mentioned eralier in this manual, the module automatically adds certain valid
 
 ```javascript
 const recordTypes = records.with(validators).buildLibrary({
-	recordTypes: {
-		'MyRecord': {
-			properties: {
-				'spaceAreCharactersToo': {
-					valueType: 'string',
-					validators: [ '-trim' ]
-				},
-			}
-		}
-	}
+    recordTypes: {
+        'MyRecord': {
+            properties: {
+                'spaceAreCharactersToo': {
+                    valueType: 'string',
+                    validators: [ '-trim' ]
+                },
+            }
+        }
+    }
 });
 ```
 
@@ -380,29 +380,29 @@ Custom validators can be added to the record types library using `validatorDefs`
 
 ```javascript
 const recordTypes = records.with(validators).buildLibrary({
-	validatorDefs: {
-		'contactUsage': function(params, ctx, value) {
+    validatorDefs: {
+        'contactUsage': function(params, ctx, value) {
 
-			if (((typeof value) === 'string') &&
-				!/^(CALL|EMAIL|TEXT|NONE)$/.test(value)) {
-				ctx.addError('Invalid contact usage value.');
-			}
+            if (((typeof value) === 'string') &&
+                !/^(CALL|EMAIL|TEXT|NONE)$/.test(value)) {
+                ctx.addError('Invalid contact usage value.');
+            }
 
-			return value;
-		}
-	},
-	recordTypes: {
-		'Contact': {
-			properties: {
-				...
-				'usage': {
-					valueType: 'string',
-					validators: [ 'contactUsage' ]
-				},
-				...
-			}
-		}
-	}
+            return value;
+        }
+    },
+    recordTypes: {
+        'Contact': {
+            properties: {
+                ...
+                'usage': {
+                    valueType: 'string',
+                    validators: [ 'contactUsage' ]
+                },
+                ...
+            }
+        }
+    }
 });
 ```
 
@@ -446,36 +446,36 @@ Validators specified on record types and nested object properties allow validati
 
 ```javascript
 const recordTypes = records.with(validators).buildLibrary({
-	validatorDefs: {
-		'timeRange': function(params, ctx, value) {
+    validatorDefs: {
+        'timeRange': function(params, ctx, value) {
 
-			const curPtr = ctx.currentPointer.toString();
-			if (!ctx.hasErrorsFor(curPtr + '/timeFrom') &&
-				!ctx.hasErrorsFor(curPtr + '/timeTo')) {
-				if (value.timeFrom > value.timeTo)
-					ctx.addError('Invalid time range.');
-			}
+            const curPtr = ctx.currentPointer.toString();
+            if (!ctx.hasErrorsFor(curPtr + '/timeFrom') &&
+                !ctx.hasErrorsFor(curPtr + '/timeTo')) {
+                if (value.timeFrom > value.timeTo)
+                    ctx.addError('Invalid time range.');
+            }
 
-			return value;
-		}
-	},
-	recordTypes: {
-		'CalendarEntry': {
-			validators: [ 'timeRange' ],
-			properties: {
-				...
-				'timeFrom': {
-					valueType: 'string',
-					validators: [ 'time' ]
-				},
-				'timeTo': {
-					valueType: 'string',
-					validators: [ 'time' ]
-				},
-				...
-			}
-		}
-	}
+            return value;
+        }
+    },
+    recordTypes: {
+        'CalendarEntry': {
+            validators: [ 'timeRange' ],
+            properties: {
+                ...
+                'timeFrom': {
+                    valueType: 'string',
+                    validators: [ 'time' ]
+                },
+                'timeTo': {
+                    valueType: 'string',
+                    validators: [ 'time' ]
+                },
+                ...
+            }
+        }
+    }
 });
 ```
 
@@ -503,10 +503,10 @@ const errors = validators.createValidationErrors();
 errors.addError('/myProp', 'My property is invalid.');
 
 if (errors.hasError('/myProp'))
-	console.log('I told ya\', it\'s totally invalid.');
+    console.log('I told ya\', it\'s totally invalid.');
 
 if (errors.isEmpty())
-	console.log('Nope, it\'s not empty dude!');
+    console.log('Nope, it\'s not empty dude!');
 ```
 
 The object's methods are:
@@ -521,7 +521,7 @@ Also, the module exports `isValidationErrors()` function that tells if the provi
 
 ```javascript
 if (validators.isValidationErrors(errors))
-	console.log(JSON.stringify(errors));
+    console.log(JSON.stringify(errors));
 ```
 
 ## Changing Default Validation Rules in Extensions
