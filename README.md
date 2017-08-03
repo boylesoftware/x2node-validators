@@ -39,11 +39,11 @@ const recordTypes = records.with(validators).buildLibrary({
                 },
                 'name': {
                     valueType: 'string',
-                    validators: [ [ 'maxLength', 50 ] ]
+                    validators: [ ['maxLength', 50] ]
                 },
                 'rank': {
                     valueType: 'number',
-                    validators: [ 'integer', [ 'range', 1, 10 ] ]
+                    validators: [ 'integer', ['range', 1, 10] ]
                 },
                 'email': {
                     valueType: 'string',
@@ -52,7 +52,7 @@ const recordTypes = records.with(validators).buildLibrary({
                 },
                 'status': {
                     valueType: 'string',
-                    validators: [ [ 'pattern', /^(ACTIVE|INACTIVE)$/ ] ]
+                    validators: [ ['pattern', /^(ACTIVE|INACTIVE)$/] ]
                 }
             }
         }
@@ -114,8 +114,8 @@ const recordTypes = records.with(validators).buildLibrary({
                 ...
                 'monthlyScores': {
                     valueType: 'number[]',
-                    validators: [ [ 'maxLength', 12 ] ],
-                    elementValidators: [ [ 'precision', 1 ], [ 'range', 0, 10 ] ]
+                    validators: [ ['maxLength', 12] ],
+                    elementValidators: [ ['precision', 1], ['range', 0, 10] ]
                 },
                 ...
             }
@@ -136,7 +136,7 @@ const recordTypes = records.with(validators).buildLibrary({
                 ...
                 'status': {
                     valueType: 'string',
-                    validators: [ [ 'pattern', /^(ACTIVE|INACTIVE)$/ ] ],
+                    validators: [ ['pattern', /^(ACTIVE|INACTIVE)$/] ],
                     validationErrorMessages: {
                         'invalidPattern': 'Invalid contact status value.'
                     }
@@ -160,7 +160,7 @@ const recordTypes = records.with(validators).buildLibrary({
                 ...
                 'rank': {
                     valueType: 'number',
-                    validators: [ 'integer', [ 'range', 1, 10 ] ],
+                    validators: [ 'integer', ['range', 1, 10] ],
                     validationErrorMessages: {
                         'outOfRange': 'The rank must be between ${min} and ${max}.'
                     }
@@ -186,7 +186,7 @@ const recordTypes = records.with(validators).buildLibrary({
                 ...
                 'rank': {
                     valueType: 'number',
-                    validators: [ 'integer', [ 'range', 1, 10 ] ],
+                    validators: [ 'integer', ['range', 1, 10] ],
                     validationErrorMessages: {
                         'outOfRange': {
                             'en-US': 'The rank must be between ${min} and ${max}.',
@@ -237,7 +237,7 @@ const recordTypes = records.with(validators).buildLibrary({
                         'es': 'rango'
                     },
                     valueType: 'number',
-                    validators: [ 'integer', [ 'range', 1, 10 ] ]
+                    validators: [ 'integer', ['range', 1, 10] ]
                 },
                 ...
             }
@@ -274,23 +274,23 @@ The module provides the following validators and normalizers out of the box:
 
 * `'integer'` - Can be added to a number property to make sure the property value is an integer. Uses message id `invalidInteger`.
 
-* `[ 'precision', numDigits ]` - This is a normalizer that can be added to a number property to round it to the specified maximum number of digits after the decimal point. Does not perform any validation.
+* `['precision', numDigits]` - This is a normalizer that can be added to a number property to round it to the specified maximum number of digits after the decimal point. Does not perform any validation.
 
 * `'trim'` - Normalizer that removes leading and trailing whitespace from a string property. Automatically added to all properties with scalar value type `string`.
 
-* `[ 'pattern', regExp ]` - Makes sure a string property matches the specified regular expression. The expression can be provided as a string or as a `RegExp`. Uses message id `invalidPattern`.
+* `['pattern', regExp]` - Makes sure a string property _contains_ the specified regular expression. The expression can be provided as a string or as a `RegExp`. Uses message id `invalidPattern`.
 
-* `[ 'maxLength', length ]` - Makes sure a string or an array property is not longer than the specified maximum length. Uses message id `tooLong` with parameter `${max}`.
+* `['maxLength', length]` - Makes sure a string or an array property is not longer than the specified maximum length. Uses message id `tooLong` with parameter `${max}`.
 
-* `[ 'minLength', length ]` - Makes sure a string or an array property is not shorter than the specified minimum length. Uses message id `tooShort` with parameter `${min}`.
+* `['minLength', length]` - Makes sure a string or an array property is not shorter than the specified minimum length. Uses message id `tooShort` with parameter `${min}`.
 
-* `[ 'max', value ]` - Makes sure a property is not greater than the specified maximum value. Uses message id `tooLarge` with parameter `${max}`. The type of the `value` parameter must be the same as the valid property value type.
+* `['max', value]` - Makes sure a property is not greater than the specified maximum value. Uses message id `tooLarge` with parameter `${max}`. The type of the `value` parameter must be the same as the valid property value type.
 
-* `[ 'min', value ]` - Makes sure a property is not smaller than the specified minimum value. Uses message id `tooSmall` with parameter `${min}`. The type of the `value` parameter must be the same as the valid property value type.
+* `['min', value]` - Makes sure a property is not smaller than the specified minimum value. Uses message id `tooSmall` with parameter `${min}`. The type of the `value` parameter must be the same as the valid property value type.
 
-* `[ 'range', min, max ]` - Makes sure a property is within the specified range. Uses message id `outOfRange` with `${min}` and `${max}` parameters. The type of the `min` and `max` parameters must be the same as the valid property value type.
+* `['range', min, max]` - Makes sure a property is within the specified range. Uses message id `outOfRange` with `${min}` and `${max}` parameters. The type of the `min` and `max` parameters must be the same as the valid property value type.
 
-* `[ 'oneOf', value1, value2, ... ]` - Makes sure the property has one of the specified values. Javascript's `===` operator is used to compare the values. Uses message id `invalidValue`.
+* `['oneOf', value1, value2, ...]` - Makes sure the property has one of the specified values. Javascript's `===` operator is used to compare the values. Uses message id `invalidValue`.
 
 * `'lowercase'` - Normalizer that converts strings to all lowercase.
 
@@ -300,7 +300,7 @@ The module provides the following validators and normalizers out of the box:
 
 * `'date'` - Makes sure that a string property is a date in format "yyyy-mm-dd". Uses message id `invalidDate`.
 
-* `[ 'time', [granularity] ]` - Makes sure that a string property is a time in "hh:mm" format using 24-hour notation. If optional granularity parameter is provided, the time must be aligned to the specified number of minutes (for example granularity value 15 will allow "22:30" but will not allow "22:32"). Uses message ids `invalidTime` and `invalidTimeGranularity`.
+* `'time'`, `['time', granularity]` - Makes sure that a string property is a time in "hh:mm" format using 24-hour notation. If optional granularity parameter is provided, the time must be aligned to the specified number of minutes (for example granularity value 15 will allow "22:30" but will not allow "22:32"). Uses message ids `invalidTime` and `invalidTimeGranularity`.
 
 * `'timeToSecond'` - Makes sure that a string property is a time in "hh:mm:ss" format using 24-hours notation. Uses message id `invalidTime`.
 
@@ -318,7 +318,7 @@ The module provides the following validators and normalizers out of the box:
 
 * `'loc_US:phone10'` - Makes sure that a string property is a 10-digit phone number. Normalizes the value by removing all spaces, dashes and parentheses. Uses message id `invalidUSPhone`.
 
-* `[ 'rangeDef', loPropName, hiPropName ]` - Validates a record or a nested object property by making sure that its child property named by the `loPropName` parameter is not greater than the one named by the `hiPropName` parameter. Both property values must be present for the validation to take place. If the "lo" property is greater than the "hi" property, an error is added to the property identified by the `hiPropName` parameter. The message id is `invalidRangeDef` and two parameters are mde available: `${rangeLoName}` for the `loPropName` property's title and `${rangeLoNameCaps}` for the same title but with capitalized first letter.
+* `['rangeDef', loPropName, hiPropName]` - Validates a record or a nested object property by making sure that its child property named by the `loPropName` parameter is not greater than the one named by the `hiPropName` parameter. Both property values must be present for the validation to take place. If the "lo" property is greater than the "hi" property, an error is added to the property identified by the `hiPropName` parameter. The message id is `invalidRangeDef` and two parameters are mde available: `${rangeLoName}` for the `loPropName` property's title and `${rangeLoNameCaps}` for the same title but with capitalized first letter.
 
 ## Validation Sets
 
@@ -410,7 +410,7 @@ const recordTypes = records.with(validators).buildLibrary({
 
 The validator function takes three arguments:
 
-* `params` - This is an array of validator parameters when the validator is used with parameters. So, for example, if a validator is used as `[ [ 'myValidator', 1, 'param2' ] ]`, the `params` argument will be an array `[ 1, 'param2' ]`.
+* `params` - This is an array of validator parameters when the validator is used with parameters. So, for example, if a validator is used as `[ ['myValidator', 1, 'param2'] ]`, the `params` argument will be an array `[ 1, 'param2' ]`.
 
 * `ctx` - This is the validation context object that allows the validator to communicate back to the framework. In the example above the context is used to report an error. The complete context object interface is described slightly furhter in this manual.
 
