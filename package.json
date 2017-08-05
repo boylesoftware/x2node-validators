@@ -1,6 +1,6 @@
 {
   "name": "x2node-validators",
-  "version": "1.2.3-alpha.0",
+  "version": "1.2.3",
   "description": "Record validation and normalization.",
   "keywords": [
     "validation",
