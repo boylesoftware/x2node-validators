@@ -424,6 +424,8 @@ The function returns the normalized value that, if different from the current on
 
 The validation context object provided to the validation functions exposes the following API:
 
+* `isValidationSet(setId)` - Tells if the specified validation set is active. Note, that the default validation set (set id "*") is always active. Other sets are activated by passing corresponding set ids to the `normalizeRecord()` function (the fifth function argument, see [Validation Sets](#validation-sets)).
+
 * `addError(message, params)` - Adds a validation error associated with the record element being currently validated by the validation function. The `message` argument can be either the message itself, or a validation error message id enclosed in curly braces (e.g. `'This property is invalid!'` for the message or `'{invalidProp}'` for the message id). The `params` optional arguments is parameters for the message template. It is an object with keys being parameter names and values being the substitution values.
 
 * `addErrorFor(ptr, message, params)` - Like `addError()`, but allows adding errors for any record element, not only the current record element. The `ptr` argument is the element JSON pointer, which can be a string or a `RecordElementPointer` object from the `x2node-pointers` module.
