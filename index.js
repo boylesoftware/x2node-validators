@@ -46,7 +46,7 @@ exports.isSupported = function(obj) {
  * Validator/normalizer function.
  *
  * @callback module:x2node-validators.validator
- * @param {Array} params Validator parameters from the subject definition.
+ * @param {Array} [params] Validator parameters from the subject definition.
  * @param {module:x2node-validators~ValidationContext} ctx Current validation
  * context.
  * @param {*} value The value to validate/normalize.
@@ -56,7 +56,6 @@ exports.isSupported = function(obj) {
 /**
  * Validator/normalizer function curried with the parameters.
  *
- * @protected
  * @callback module:x2node-validators.curriedValidator
  * @param {module:x2node-validators~ValidationContext} ctx Current validation
  * context.
@@ -97,6 +96,27 @@ exports.createValidationErrors = function() {
 exports.isValidationErrors = function(obj) {
 
 	return (obj instanceof ValidationErrors);
+};
+
+/**
+ * Create validator function that checks that specified properties in the context
+ * do not have any errors.
+ *
+ * @param {Array.<string>} depPtrs JSON pointers for properties, none of which
+ * should have errors for the validator to be invoked.
+ * @param {module:x2node-validators.curriedValidator} validatorFunc The validator
+ * function to invoke if all dependency properties are valid. The returned value
+ * is ignored.
+ * @returns {Array.<module:x2node-validators.validator>} Single-element array
+ * with the resulting validator function.
+ */
+exports.dep = function(depPtrs, validatorFunc) {
+	return [ function(_, ctx, value) {
+		const curPtr = ctx.currentPointer.toString();
+		if (depPtrs.every(ptr => !ctx.hasErrorsFor(`${curPtr}${ptr}`)))
+			validatorFunc(ctx, value);
+		return value;
+	} ];
 };
 
 
@@ -370,7 +390,7 @@ function createValidators(
 	for (let setId in sets) {
 		let validators = new Array();
 		for (let validatorSpec of sets[setId]) {
-			let validatorId, params;
+			let validatorFunc, validatorId, params;
 			if ((typeof validatorSpec) === 'string') {
 				validatorId = validatorSpec;
 				if (validatorId.startsWith('-')) {
@@ -378,17 +398,22 @@ function createValidators(
 					validators = validators.filter(v => (v.id !== validatorId));
 					continue;
 				}
-			} else if (Array.isArray(validatorSpec) && (validatorSpec.length > 0)) {
+				validatorFunc = validatorFuncs[validatorId];
+			} else if (Array.isArray(validatorSpec)
+				&& (validatorSpec.length > 0)) {
 				validatorId = validatorSpec[0];
 				if (validatorSpec.length > 1)
 					params = validatorSpec.slice(1);
+				validatorFunc = validatorFuncs[validatorId];
+			} else if ((typeof validatorSpec) === 'function') {
+				validatorId = '---';
+				validatorFunc = validatorSpec;
 			} else {
 				throw new common.X2UsageError(
 					'Invalid validators specification on ' + subjDescription +
-						': each validator must be either a string or a' +
-						' non-empty array.');
+						': each validator must be either a string, a function' +
+						' or a non-empty array.');
 			}
-			const validatorFunc = validatorFuncs[validatorId];
 			if (!validatorFunc)
 				throw new common.X2UsageError(
 					'Invalid validators specification on ' + subjDescription +

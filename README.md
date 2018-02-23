@@ -17,6 +17,7 @@ See module's [API Reference Documentation](https://boylesoftware.github.io/x2nod
   * [Validation Functions](#validation-functions)
   * [Validation Context](#validation-context)
   * [Object Validators and Validation Order](#object-validators-and-validation-order)
+  * [Anonymous Validators](#anonymous-validators)
 * [Record Types Library Extension](#record-types-library-extension)
 * [Validation Errors Object](#validation-errors-object)
 * [Changing Default Validation Rules in Extensions](#changing-default-validation-rules-in-extensions)
@@ -74,9 +75,9 @@ else
     console.log('The record is valid!');
 ```
 
-Any property or the record type definition can have a `validators` attribute, which is an array of validator/normalizator references, possibly with parameters. Each reference is either a string with a registered the validator id or, if the validator requires parameters, an array where the first element is the validator id followed by the parameters.
+Any property or the record type definition can have a `validators` attribute, which is an array of validator/normalizator specifiers, possibly with parameters. Each specifier can be a string, which is a registered validator id or, if the validator requires parameters, an array where the first element is the validator id followed by the parameters. Alternatively, the specifier can be a function used as the anonymous (not registered in the record types library and having no id) validator.
 
-Each validator may have two functions: value _validation_ and value _normalization_. The validation checks if the value is approprivate and if not, reports a specific validation error message. Also, a validator may normalize the value (for example trim a string, convert it to all lowercase, remove non-digits, etc.). The normalized value is set back into the record. In the example above the `lowercase` normalizer used on the `email` property updates the `email` property of the provided record to _john@<span></span>walrus.com_ from _John@<span></span>Walrus.com_ after the `normalizeRecord()` function call.
+Each validator may have two functions: value _validation_ and value _normalization_. The validation checks if the value is appropriate and if not, reports a specific validation error. Also, a validator may normalize the value (for example trim a string, convert it to all lowercase, remove non-digits, etc.). The normalized value is set back into the record. In the example above the `lowercase` normalizer used on the `email` property updates the `email` property of the provided record to _john@<span></span>walrus.com_ from _John@<span></span>Walrus.com_ after the `normalizeRecord()` function call.
 
 Upon successful validation, the returned by the `normalizeRecord()` function `errors` object is `null`. However, if there are validation errors, they are reported in that object. The errors object's own enumerable property names in that case will be JSON pointers (see [RFC 6901 JSON Pointer](https://tools.ietf.org/html/rfc6901)) for the invalid record elements and values will be arrays of corresponding validation error messages (at least one). So, for example the following invalid _Contact_ record:
 
@@ -100,7 +101,7 @@ will yield the following `errors` object:
 }
 ```
 
-The `name` is reported as missing value, because the validators module automatically adds certain validators to the properties based on their basic definition type. For example, all non-optional properties get a `required` standard validator responsible for missing value error and described further in this manual. Also, all properties get a validator that ensured the correct value type and format, so the `email` property gets the error message in the above example.
+The `name` is reported as missing value, because the validators module automatically adds certain validators to the properties based on their basic definition type. For example, all non-optional properties get a `required` standard validator responsible for missing value error and described below. Also, all properties get a validator that ensures the correct value type and format, so the `email` property gets the error message in the above example.
 
 ## Collection Element Validators
 
@@ -290,7 +291,7 @@ The module provides the following validators and normalizers out of the box:
 
 * `['range', min, max]` - Makes sure a property is within the specified range. Uses message id `outOfRange` with `${min}` and `${max}` parameters. The type of the `min` and `max` parameters must be the same as the valid property value type.
 
-* `['oneOf', value1, value2, ...]` - Makes sure the property has one of the specified values. Javascript's `===` operator is used to compare the values. Uses message id `invalidValue`.
+* `['oneOf', value1, value2, ...]` or `['oneOf', [ value1, value2, ... ]]` - Makes sure the property has one of the specified values. Javascript's `===` operator is used to compare the values. Uses message id `invalidValue`. Note, that often `pattern` validator can be used as a better alternative.
 
 * `'lowercase'` - Normalizer that converts strings to all lowercase.
 
@@ -337,7 +338,7 @@ const recordTypes = records.with(validators).buildLibrary({
                         'set1,set2': [ 'validator3' ],
                         '*': [ 'validator4' ]
                     }
-                },
+                }
             }
         }
     }
@@ -365,7 +366,7 @@ const recordTypes = records.with(validators).buildLibrary({
                 'spaceAreCharactersToo': {
                     valueType: 'string',
                     validators: [ '-trim' ]
-                },
+                }
             }
         }
     }
@@ -410,7 +411,7 @@ const recordTypes = records.with(validators).buildLibrary({
 
 The validator function takes three arguments:
 
-* `params` - This is an array of validator parameters when the validator is used with parameters. So, for example, if a validator is used as `[ ['myValidator', 1, 'param2'] ]`, the `params` argument will be an array `[ 1, 'param2' ]`.
+* `params` - This is an array of validator parameters when the validator is used with parameters. So, for example, if a validator is used as `[ ['myValidator', 1, 'param2'] ]`, the `params` argument will be an array `[ 1, 'param2' ]`. If validator does not have any parameters, this argument is `undefined`.
 
 * `ctx` - This is the validation context object that allows the validator to communicate back to the framework. In the example above the context is used to report an error. The complete context object interface is described slightly furhter in this manual.
 
@@ -432,6 +433,8 @@ The validation context object provided to the validation functions exposes the f
 
 * `hasErrorsFor(ptr)` - Tells if the context already has errors for the record element specified by the `ptr` argument, which is a JSON pointer as a string or as a `RecordElementPointer` object from the `x2node-pointers` module.
 
+* `isEmpty(val)` - Tells if the provided value is `undefined` or `null`. May be useful in validation function implementations that often need to perform this kind of a test and always have the context available.
+
 * `recordTypes` - Reference to the `RecordTypesLibrary` (from the `x2node-records` module) object.
 
 * `currentPointer` - `RecordElementPointer` (from the `x2node-pointers` module) pointing at the record element being currently validated by the validation function.
@@ -452,8 +455,8 @@ const recordTypes = records.with(validators).buildLibrary({
         'timeRange': function(params, ctx, value) {
 
             const curPtr = ctx.currentPointer.toString();
-            if (!ctx.hasErrorsFor(curPtr + '/timeFrom') &&
-                !ctx.hasErrorsFor(curPtr + '/timeTo')) {
+            if (!ctx.hasErrorsFor(`${curPtr}/timeFrom`) &&
+                !ctx.hasErrorsFor(`${curPtr}/timeTo`)) {
                 if (value.timeFrom > value.timeTo)
                     ctx.addError('Invalid time range.');
             }
@@ -482,6 +485,71 @@ const recordTypes = records.with(validators).buildLibrary({
 ```
 
 This logic relies on the specific order, in which validators are called. The framework first calls validators on the deepest nested properties gradually proceeding upwards, so that the top record validators, if any, are always called last after all the nested properties have been validated and normalized. That way, the `timeRange` validator in the example above verifies that it makes sense to execute its logic by first checking that the "from" and "to" times are valid by themselves and only then comparing them.
+
+### Anonymous Validators
+
+In some situation, particularly when it comes to validating records and nested objects, the validation logic is unique and may not make much sense to define the validation function somewhere else and assign it an id. For those cases, instead of using a custom validator id the validation function can be specified right in place. The example in the previous section could be written as:
+
+```javascript
+const recordTypes = records.with(validators).buildLibrary({
+    recordTypes: {
+        'CalendarEntry': {
+            validators: [ function(_, ctx, value) {
+
+                const curPtr = ctx.currentPointer.toString();
+                if (!ctx.hasErrorsFor(`${curPtr}/timeFrom`) &&
+                    !ctx.hasErrorsFor(`${curPtr}/timeTo`)) {
+                    if (value.timeFrom > value.timeTo)
+                        ctx.addError('Invalid time range.');
+                }
+
+                return value;
+            } ],
+            properties: {
+                ...
+                'timeFrom': {
+                    valueType: 'string',
+                    validators: [ 'time' ]
+                },
+                'timeTo': {
+                    valueType: 'string',
+                    validators: [ 'time' ]
+                },
+                ...
+            }
+        }
+    }
+});
+```
+
+Checking that some properties have no errors before proceeding to the validator logic is so frequent when it comes to validating records and nested objects that the module provides a shortcut that wraps provided validation function and performs the dependency properties validity check. So, the example above could be rewritten:
+
+```javascript
+const recordTypes = records.with(validators).buildLibrary({
+    recordTypes: {
+        'CalendarEntry': {
+            validators: validators.dep([ '/timeFrom', '/timeTo' ], function(ctx, value) {
+                if (value.timeFrom > value.timeTo)
+                    ctx.addError('Invalid time range.');
+            }),
+            properties: {
+                ...
+                'timeFrom': {
+                    valueType: 'string',
+                    validators: [ 'time' ]
+                },
+                'timeTo': {
+                    valueType: 'string',
+                    validators: [ 'time' ]
+                },
+                ...
+            }
+        }
+    }
+});
+```
+
+Note that the function passed to the `validators.dep()` has no `params` argument and does not have to return the value. The function is invoked only if neither `timeFrom` nor `timeTo` properties have validation errors.
 
 ## Record Types Library Extension
 
