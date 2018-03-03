@@ -279,7 +279,7 @@ The module provides the following validators and normalizers out of the box:
 
 * `'trim'` - Normalizer that removes leading and trailing whitespace from a string property. Automatically added to all properties with scalar value type `string`.
 
-* `['pattern', regExp]` - Makes sure a string property _contains_ the specified regular expression. The expression can be provided as a string or as a `RegExp`. Uses message id `invalidPattern`.
+* `['pattern', regExp]` - Makes sure a string property _contains_ the specified regular expression. The expression can be provided as a string or as a `RegExp`. Uses message id `invalidPattern` with `pattern` parameter.
 
 * `['maxLength', length]` - Makes sure a string or an array property is not longer than the specified maximum length. Uses message id `tooLong` with parameter `${max}`.
 
@@ -493,6 +493,8 @@ const recordTypes = records.with(validators).buildLibrary({
 ```
 
 This logic relies on the specific order, in which validators are called. The framework first calls validators on the deepest nested properties gradually proceeding upwards, so that the top record validators, if any, are always called last after all the nested properties have been validated and normalized. That way, the `timeRange` validator in the example above verifies that it makes sense to execute its logic by first checking that the "from" and "to" times are valid by themselves and only then comparing them.
+
+Also, the properties are always validated in the order they are defined in the record type definition. That way, a validator for a property can check if another property defined above the current one passed its own validation or has any validation errors. This is useful for validators that introduce dependencies on sibling properties (for example, standard `requiredIf`, `requiredUnless`, `emptyIf` and `emptyUnless` are that kind of validators).
 
 ### Anonymous Validators
 
