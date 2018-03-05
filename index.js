@@ -127,7 +127,7 @@ exports.dep = function(depPtrs, validatorFunc) {
  * @returns {RegExp} The resular expression.
  */
 exports.listpat = function(list) {
-	return new RegExp(`/^(${list.join('|')})$/`);
+	return new RegExp(`^(${list.join('|')})$`);
 };
 
 
