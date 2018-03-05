@@ -279,7 +279,7 @@ The module provides the following validators and normalizers out of the box:
 
 * `'trim'` - Normalizer that removes leading and trailing whitespace from a string property. Automatically added to all properties with scalar value type `string`.
 
-* `['pattern', regExp]` - Makes sure a string property _contains_ the specified regular expression. The expression can be provided as a string or as a `RegExp`. Uses message id `invalidPattern` with `pattern` parameter.
+* `['pattern', regExp]` - Makes sure a string property _contains_ the specified regular expression. The expression can be provided as a string or as a `RegExp`. The `pattern` validator is recommended agaisnt the `oneOf` validator. As a helper, the module exports `listpat(list)` function, which build a regular expression from the provided array of valid values. Uses message id `invalidPattern` with `pattern` parameter.
 
 * `['maxLength', length]` - Makes sure a string or an array property is not longer than the specified maximum length. Uses message id `tooLong` with parameter `${max}`.
 
@@ -291,7 +291,7 @@ The module provides the following validators and normalizers out of the box:
 
 * `['range', min, max]` - Makes sure a property is within the specified range. Uses message id `outOfRange` with `${min}` and `${max}` parameters. The type of the `min` and `max` parameters must be the same as the valid property value type.
 
-* `['oneOf', value1, value2, ...]` or `['oneOf', [ value1, value2, ... ]]` - Makes sure the property has one of the specified values. Javascript's `===` operator is used to compare the values. Uses message id `invalidValue`. Note, that often `pattern` validator can be used as a better alternative.
+* `['oneOf', value1, value2, ...]` or `['oneOf', [ value1, value2, ... ]]` - Makes sure the property has one of the specified values. Javascript's `===` operator is used to compare the values. Uses message id `invalidValue`. Note, that often `pattern` validator can be used as a better performing alternative (see `listpat()` module function).
 
 * `'lowercase'` - Normalizer that converts strings to all lowercase.
 

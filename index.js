@@ -119,6 +119,17 @@ exports.dep = function(depPtrs, validatorFunc) {
 	} ];
 };
 
+/**
+ * Create regular expression for a list of valid values. Useful with the
+ * "pattern" standard validator.
+ *
+ * @param {Array.<string>} list List of valid values.
+ * @returns {RegExp} The resular expression.
+ */
+exports.listpat = function(list) {
+	return new RegExp(`/^(${list.join('|')})$/`);
+};
+
 
 /////////////////////////////////////////////////////////////////////////////////
 // Record Types Library Extension
