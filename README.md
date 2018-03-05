@@ -445,6 +445,8 @@ The validation context object provided to the validation functions exposes the f
 
 * `recordTypes` - Reference to the `RecordTypesLibrary` (from the `x2node-records` module) object.
 
+* `recordTypeDesc` - Record type descriptor.
+
 * `currentPointer` - `RecordElementPointer` (from the `x2node-pointers` module) pointing at the record element being currently validated by the validation function.
 
 * `currentPropDesc` - `PropertyDescriptor` (from the `x2node-records` module) for the property being currently validated by the validation function, or `null` if it's the whole record.

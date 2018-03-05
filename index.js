@@ -579,7 +579,7 @@ exports.extendPropertyDescriptor = function(ctx, propDesc) {
 	// set validation error messages on the property descriptor
 	propDesc._validationErrorMessages = validationErrorMessages;
 
-	// setup validators is not a view
+	// setup validators if not a view
 	propDesc._validators = null;
 	if (!propDesc.isView() && !propDesc.isPolymorphObjectType()) {
 
