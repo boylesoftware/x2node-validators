@@ -595,45 +595,50 @@ exports.extendPropertyDescriptor = function(ctx, propDesc) {
 	if (!propDesc.isView() && !propDesc.isPolymorphObjectType()) {
 
 		// determine default validators
-		const defaultValidators = [];
-		const defaultElementValidators = [];
-		if (!propDesc.optional)
-			defaultValidators.push('required');
-		let contextValidators = defaultValidators;
+		const scalarValueValidators = [];
+		switch (propDesc.scalarValueType) {
+		case 'string':
+			scalarValueValidators.push('trim');
+			scalarValueValidators.push('dropEmptyString');
+			scalarValueValidators.push('string');
+			break;
+		case 'number':
+			scalarValueValidators.push('number');
+			break;
+		case 'boolean':
+			scalarValueValidators.push('boolean');
+			break;
+		case 'datetime':
+			scalarValueValidators.push('dropEmptyString');
+			scalarValueValidators.push('datetime');
+			break;
+		case 'ref':
+			scalarValueValidators.push('dropEmptyString');
+			scalarValueValidators.push([ 'ref', propDesc.refTarget ]);
+			break;
+		case 'object':
+			scalarValueValidators.push('object');
+		}
+		let defaultValidators, defaultElementValidators;
 		if (propDesc.isArray()) {
-			defaultValidators.push('array');
+			defaultValidators = [ 'array' ];
+			defaultElementValidators = scalarValueValidators;
 			if (propDesc.scalarValueType === 'object') {
 				defaultElementValidators.push('required');
 			} else if (!propDesc.allowDuplicates) {
 				defaultValidators.push('noDupes');
 			}
-			contextValidators = defaultElementValidators;
 		} else if (propDesc.isMap()) {
-			defaultValidators.push('object');
+			defaultValidators = [ 'object' ];
+			defaultElementValidators = scalarValueValidators;
 			if (propDesc.scalarValueType === 'object')
 				defaultElementValidators.push('required');
-			contextValidators = defaultElementValidators;
+		} else {
+			defaultValidators = scalarValueValidators;
+			defaultElementValidators = [];
 		}
-		switch (propDesc.scalarValueType) {
-		case 'string':
-			contextValidators.push('string');
-			contextValidators.push('trim');
-			break;
-		case 'number':
-			contextValidators.push('number');
-			break;
-		case 'boolean':
-			contextValidators.push('boolean');
-			break;
-		case 'datetime':
-			contextValidators.push('datetime');
-			break;
-		case 'ref':
-			contextValidators.push([ 'ref', propDesc.refTarget ]);
-			break;
-		case 'object':
-			contextValidators.push('object');
-		}
+		if (!propDesc.optional)
+			defaultValidators.push('required');
 		propDesc[DEFAULT_VALIDATORS] = {
 			'*': defaultValidators,
 			'element:*': defaultElementValidators

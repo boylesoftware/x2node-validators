@@ -277,6 +277,8 @@ The module provides the following validators and normalizers out of the box:
 
 * `['precision', numDigits]` - This is a normalizer that can be added to a number property to round it to the specified maximum number of digits after the decimal point. Does not perform any validation.
 
+* `'dropEmptyString'` - Normalizer that replaces empty string with `undefined`. Automatically added to all properties with scalar value type `string`, `datetime` and `ref` (that is those that are represented in JSON with a string).
+
 * `'trim'` - Normalizer that removes leading and trailing whitespace from a string property. Automatically added to all properties with scalar value type `string`.
 
 * `['pattern', regExp]` - Makes sure a string property _contains_ the specified regular expression. The expression can be provided as a string or as a `RegExp`. The `pattern` validator is recommended agaisnt the `oneOf` validator. As a helper, the module exports `listpat(list)` function, which build a regular expression from the provided array of valid values. Uses message id `invalidPattern` with `pattern` parameter.
